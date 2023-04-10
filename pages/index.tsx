@@ -5,18 +5,6 @@ import { Message } from "@/components/Message";
 import { INITIAL_GREETING } from "@/helpers/constants";
 import Head from "next/head";
 
-const addMessageToHistory = (
-  message: Pick<TMessage, "text" | "user">,
-  chatHistory: TChatHistory
-) => {
-  const newMessage: TMessage = {
-    text: message.text,
-    timestamp: Date.now().toString(),
-    user: message.user,
-  };
-  return [...chatHistory, newMessage];
-};
-
 export default function Home() {
   const chatContainerRef = useRef<HTMLElement | null>(null);
   const [input, setInput] = useState<string>("");
