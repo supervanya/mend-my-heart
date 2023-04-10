@@ -43,53 +43,58 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen max-w-2xl mx-auto flex-col items-center gap-4 p-24">
-      <ChatHistory>
-        <Message
-          text={INITIAL_GREETING}
-          timestamp={new Date().toISOString()}
-          user="bot"
-        />
-        {chatHistory?.map((message) => (
+    <>
+      <p className="text-xl font-bold p-8 bg-slate-50 w-full text-center text-slate-600 rounded-sm sticky top-0 backdrop-blur-3xl bg-opacity-50">
+        Heart Mender 💔 {"->"} ❤️‍🩹
+      </p>
+      <main className="flex min-h-screen max-w-lg mx-auto flex-col items-center gap-4 pt-8 p-4">
+        <ChatHistory>
           <Message
-            key={message.timestamp}
-            text={message.text}
-            timestamp={message.timestamp}
-            user={message.user}
+            text={INITIAL_GREETING}
+            timestamp={new Date().toISOString()}
+            user="bot"
           />
-        ))}
-      </ChatHistory>
+          {chatHistory?.map((message) => (
+            <Message
+              key={message.timestamp}
+              text={message.text}
+              timestamp={message.timestamp}
+              user={message.user}
+            />
+          ))}
+        </ChatHistory>
 
-      <textarea
-        className="w-full p-2 border-2 border-gray-300 rounded-md"
-        aria-multiline="true"
-        placeholder="Tell me in as much details as you would like, but the more the better..."
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            handleSubmit();
-          }
-        }}
-      />
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          onClick={handleSubmit}
-          disabled={!input}
-          className="bg-blue-500 text-white px-4 rounded-md disabled:opacity-50"
-        >
-          Submit
-        </button>
-        <button
-          className="text-slate-700 p-2 rounded-md disabled:opacity-50"
-          disabled={!chatHistory}
-          onClick={resetChatHistory}
-        >
-          Start Over
-        </button>
-      </div>
-    </main>
+        <textarea
+          className="w-full p-2 border-2 border-gray-300 rounded-md"
+          aria-multiline="true"
+          placeholder="Tell me in as much details as you would like, but the more the better..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
+        />
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            disabled={!input}
+            className="bg-blue-500 text-white px-4 rounded-md disabled:opacity-50"
+          >
+            Submit
+          </button>
+          <button
+            className="text-slate-700 p-2 rounded-md disabled:opacity-50"
+            disabled={!chatHistory}
+            onClick={resetChatHistory}
+          >
+            Start Over
+          </button>
+        </div>
+      </main>
+    </>
   );
 }

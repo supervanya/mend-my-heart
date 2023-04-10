@@ -7,8 +7,7 @@ export const Message: React.FC<TMessage> = ({ text, user, timestamp }) => {
   return (
     <div className={`text-base w-full flex ${align}`}>
       <p
-        className={`${color} py-2 px-4 rounded-2xl text-white`}
-        style={{ maxWidth: "70%" }}
+        className={`${color} py-2 px-4 rounded-2xl text-white max-w-xs md:max-w-md`}
       >
         {text}
       </p>
