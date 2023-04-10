@@ -62,7 +62,7 @@ export default function Home() {
       <Head>
         <title>Heart Mender 💔 -{">"} ❤️‍🩹</title>
       </Head>
-      <nav className="text-xl font-bold px-8 py-4 bg-slate-50 w-full text-center text-slate-600 rounded-sm sticky top-0 backdrop-blur-3xl bg-opacity-50">
+      <nav className="text-xl font-bold px-8 py-4 bg-slate-50 w-full text-center text-slate-500 rounded-sm sticky top-0 backdrop-blur-3xl bg-opacity-50">
         Heart Mender 💔 {"->"} ❤️‍🩹
       </nav>
       <main
