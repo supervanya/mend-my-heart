@@ -1,76 +1,78 @@
-import { TChatHistory, TMessage, ChatHistory } from "../components/ChatHistory";
+import { TMessage, ChatHistory } from "../components/ChatHistory";
 import { useRef, useState } from "react";
 import { useMessages } from "@/helpers/useMessages";
 import { Message } from "@/components/Message";
 import { INITIAL_GREETING } from "@/helpers/constants";
 import Head from "next/head";
 
+const getResponseFromBot = async (message: string) => {
+  const response = await fetch(`/api/hello?message=${message}`);
+  const data = await response.json();
+  return data;
+};
+
 export default function Home() {
   const chatContainerRef = useRef<HTMLElement | null>(null);
+  const [fetching, setFetching] = useState(false);
   const [input, setInput] = useState<string>("");
   const { chatHistory, addMessageToHistory, resetChatHistory } = useMessages();
 
-  const updateUserMessage = async () => {
-    if (input) {
-      handleNewMessage(input, "user");
-      setInput("");
-    }
-  };
-
-  const getResponseFromBot = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return "Hello, I am a bot.";
-  };
-
   const scrollToBottom = () => {
+    // (iprokopovich)FIXME: this doesn't fully work
     window.scrollTo({
       top: document.documentElement.scrollHeight,
       behavior: "smooth",
     });
   };
 
-  const handleNewMessage = (message: string, user: TMessage["user"]) => {
-    addMessageToHistory({ text: message, user });
-    scrollToBottom();
+  const handleAddNewMessage = (text: string, user: TMessage["user"]) => {
+    addMessageToHistory({ text, user });
+    if (user === "bot") {
+      setFetching(false);
+    } else {
+      setInput("");
+    }
+    return text;
   };
 
   const handleSubmit = async () => {
     if (!input) {
       return;
     }
+    handleAddNewMessage(input, "user");
 
-    await updateUserMessage();
-    const botResponse = await getResponseFromBot();
-    handleNewMessage(botResponse, "bot");
+    setFetching(true);
+    scrollToBottom();
+    const botResponse = await getResponseFromBot(input);
+    scrollToBottom();
+    handleAddNewMessage(botResponse, "bot");
     scrollToBottom();
   };
 
   return (
     <>
       <Head>
-        <title>Heart Mender 💔 -{">"} ❤️‍🩹</title>
+        <title>Heart Mender 💔 - ❤️‍🩹</title>
       </Head>
       <nav className="text-xl font-bold px-8 py-4 bg-slate-50 w-full text-center text-slate-500 rounded-sm sticky top-0 backdrop-blur-3xl bg-opacity-50">
-        Heart Mender 💔 {"->"} ❤️‍🩹
+        Heart Mender 💔 - ❤️‍🩹
       </nav>
       <main
         ref={chatContainerRef}
-        className="flex min-h-screen max-w-lg mx-auto flex-col items-center gap-4 pt-8 p-4 mb-8"
+        className="flex min-h-screen max-w-lg mx-auto flex-col items-center gap-4 p-4"
       >
         <ChatHistory>
-          <Message
-            text={INITIAL_GREETING}
-            timestamp={new Date().toISOString()}
-            user="bot"
-          />
+          <Message user="bot">{INITIAL_GREETING} </Message>
           {chatHistory?.map((message) => (
-            <Message
-              key={message.timestamp}
-              text={message.text}
-              timestamp={message.timestamp}
-              user={message.user}
-            />
+            <Message key={message.timestamp} user={message.user}>
+              {message.text}
+            </Message>
           ))}
+          {fetching && (
+            <Message user="bot">
+              <p className="animate-ping">...</p>
+            </Message>
+          )}
         </ChatHistory>
       </main>
       <div className="flex items-center gap-2 px-8 py-4 bg-slate-50 w-full flex-col rounded-sm sticky bottom-0 backdrop-blur-3xl bg-opacity-50">

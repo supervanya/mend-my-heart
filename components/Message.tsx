@@ -1,6 +1,8 @@
 import { TMessage } from "./ChatHistory";
 
-export const Message: React.FC<TMessage> = ({ text, user, timestamp }) => {
+export const Message: React.FC<
+  Pick<TMessage, "user"> & { children: React.ReactNode }
+> = ({ children, user }) => {
   const color = user === "bot" ? "bg-gray-500" : "bg-blue-500";
   const align = user === "bot" ? "justify-start" : "justify-end";
 
@@ -9,7 +11,7 @@ export const Message: React.FC<TMessage> = ({ text, user, timestamp }) => {
       <p
         className={`${color} py-2 px-4 rounded-2xl text-white max-w-xs md:max-w-md`}
       >
-        {text}
+        {children}
       </p>
       {/* <span className="text-xs text-gray-400">
         {new Date(timestamp).toLocaleString()}
