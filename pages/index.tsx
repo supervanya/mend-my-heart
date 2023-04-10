@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { useMessages } from "@/helpers/useMessages";
 import { Message } from "@/components/Message";
 import { INITIAL_GREETING } from "@/helpers/constants";
+import Head from "next/head";
 
 const addMessageToHistory = (
   message: Pick<TMessage, "text" | "user">,
@@ -17,12 +18,13 @@ const addMessageToHistory = (
 };
 
 export default function Home() {
+  const chatContainerRef = useRef<HTMLElement | null>(null);
   const [input, setInput] = useState<string>("");
   const { chatHistory, addMessageToHistory, resetChatHistory } = useMessages();
 
   const updateUserMessage = async () => {
     if (input) {
-      addMessageToHistory({ text: input, user: "user" });
+      handleNewMessage(input, "user");
       setInput("");
     }
   };
@@ -32,6 +34,18 @@ export default function Home() {
     return "Hello, I am a bot.";
   };
 
+  const scrollToBottom = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: "smooth",
+    });
+  };
+
+  const handleNewMessage = (message: string, user: TMessage["user"]) => {
+    addMessageToHistory({ text: message, user });
+    scrollToBottom();
+  };
+
   const handleSubmit = async () => {
     if (!input) {
       return;
@@ -39,15 +53,22 @@ export default function Home() {
 
     await updateUserMessage();
     const botResponse = await getResponseFromBot();
-    addMessageToHistory({ text: botResponse, user: "bot" });
+    handleNewMessage(botResponse, "bot");
+    scrollToBottom();
   };
 
   return (
     <>
-      <p className="text-xl font-bold p-8 bg-slate-50 w-full text-center text-slate-600 rounded-sm sticky top-0 backdrop-blur-3xl bg-opacity-50">
+      <Head>
+        <title>Heart Mender 💔 -{">"} ❤️‍🩹</title>
+      </Head>
+      <nav className="text-xl font-bold px-8 py-4 bg-slate-50 w-full text-center text-slate-600 rounded-sm sticky top-0 backdrop-blur-3xl bg-opacity-50">
         Heart Mender 💔 {"->"} ❤️‍🩹
-      </p>
-      <main className="flex min-h-screen max-w-lg mx-auto flex-col items-center gap-4 pt-8 p-4">
+      </nav>
+      <main
+        ref={chatContainerRef}
+        className="flex min-h-screen max-w-lg mx-auto flex-col items-center gap-4 pt-8 p-4 mb-8"
+      >
         <ChatHistory>
           <Message
             text={INITIAL_GREETING}
@@ -63,9 +84,10 @@ export default function Home() {
             />
           ))}
         </ChatHistory>
-
+      </main>
+      <div className="flex items-center gap-2 px-8 py-4 bg-slate-50 w-full flex-col rounded-sm sticky bottom-0 backdrop-blur-3xl bg-opacity-50">
         <textarea
-          className="w-full p-2 border-2 border-gray-300 rounded-md"
+          className="w-full p-2 border-2 border-gray-300 rounded-md max-w-screen-md"
           aria-multiline="true"
           placeholder="Tell me in as much details as you would like, but the more the better..."
           value={input}
@@ -77,7 +99,7 @@ export default function Home() {
             }
           }}
         />
-        <div className="flex gap-2">
+        <div className="flex justify-center">
           <button
             type="submit"
             onClick={handleSubmit}
@@ -94,7 +116,7 @@ export default function Home() {
             Start Over
           </button>
         </div>
-      </main>
+      </div>
     </>
   );
 }
