@@ -1,5 +1,17 @@
 import { TMessage } from "@/helpers/types";
 
+const LineSplitter: React.FC<{ children: string }> = ({ children }) => {
+  return (
+    <>
+      {children.split("\n").map((line, i) => (
+        <p key={i}>
+          {line} <br />
+        </p>
+      ))}
+    </>
+  );
+};
+
 export const Message: React.FC<
   Pick<TMessage, "role"> & { children: React.ReactNode }
 > = ({ children, role }) => {
@@ -9,9 +21,13 @@ export const Message: React.FC<
   return (
     <div className={`flex w-full text-base ${align}`}>
       <p
-        className={`${color} max-w-xs rounded-2xl px-4 py-2 text-white md:max-w-md`}
+        className={`${color} format max-w-xs rounded-2xl px-4 py-2 text-white md:max-w-md`}
       >
-        {children}
+        {typeof children === "string" ? (
+          <LineSplitter>{children}</LineSplitter>
+        ) : (
+          children
+        )}
       </p>
       {/* <span className="text-xs text-gray-400">
         {new Date(timestamp).toLocaleString()}

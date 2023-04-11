@@ -43,8 +43,6 @@ export default async function handler(
         ],
       });
 
-      console.log(completion.data.choices);
-
       const bestReply =
         completion.data.choices[0].message?.content ?? UNSURE_RESPONSE;
 
