@@ -1,3 +1,4 @@
+"use client";
 import { TMessage, ChatHistory } from "../components/ChatHistory";
 import { useRef, useState } from "react";
 import { useMessages } from "@/helpers/useMessages";
@@ -54,12 +55,12 @@ export default function Home() {
       <Head>
         <title>Heart Mender 💔 - ❤️‍🩹</title>
       </Head>
-      <nav className="text-xl font-bold px-8 py-4 bg-slate-50 w-full text-center text-slate-500 rounded-sm sticky top-0 backdrop-blur-3xl bg-opacity-50">
+      <nav className="sticky top-0 w-full rounded-sm bg-slate-50 bg-opacity-50 px-8 py-4 text-center text-xl font-bold text-slate-500 backdrop-blur-3xl">
         Heart Mender 💔 - ❤️‍🩹
       </nav>
       <main
         ref={chatContainerRef}
-        className="flex min-h-screen max-w-lg mx-auto flex-col items-center gap-4 p-4"
+        className="mx-auto flex min-h-screen max-w-lg flex-col items-center gap-4 p-4"
       >
         <ChatHistory>
           <Message user="bot">{INITIAL_GREETING} </Message>
@@ -75,9 +76,9 @@ export default function Home() {
           )}
         </ChatHistory>
       </main>
-      <div className="flex items-center gap-2 px-8 py-4 bg-slate-50 w-full flex-col rounded-sm sticky bottom-0 backdrop-blur-3xl bg-opacity-50">
+      <div className="sticky bottom-0 flex w-full flex-col items-center gap-2 rounded-sm bg-slate-50 bg-opacity-50 px-8 py-4 backdrop-blur-3xl">
         <textarea
-          className="w-full p-2 border-2 border-gray-300 rounded-md max-w-screen-md"
+          className="w-full max-w-screen-md rounded-md border-2 border-gray-300 p-2"
           aria-multiline="true"
           placeholder="Tell me in as much details as you would like, but the more the better..."
           value={input}
@@ -94,12 +95,12 @@ export default function Home() {
             type="submit"
             onClick={handleSubmit}
             disabled={!input}
-            className="bg-blue-500 text-white px-4 rounded-md disabled:opacity-50"
+            className="rounded-md bg-blue-500 px-4 text-white disabled:opacity-50"
           >
             Submit
           </button>
           <button
-            className="text-slate-700 p-2 rounded-md disabled:opacity-50"
+            className="rounded-md p-2 text-slate-700 disabled:opacity-50"
             disabled={!chatHistory}
             onClick={resetChatHistory}
           >
