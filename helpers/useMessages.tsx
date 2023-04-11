@@ -1,11 +1,13 @@
 import { useEffectOnce, useLocalStorage } from "usehooks-ts";
-import { TChatHistory, TMessage } from "../components/ChatHistory";
 import { useState } from "react";
-
-const KEY = "chatHistory";
+import { TChatHistory, TMessage } from "./types";
+import { LOCAL_STORAGE_KEY } from "./constants";
 
 export const useMessages = () => {
-  const [chatHistoryLS, updateChatHistoryLS] = useLocalStorage(KEY, "");
+  const [chatHistoryLS, updateChatHistoryLS] = useLocalStorage(
+    LOCAL_STORAGE_KEY,
+    ""
+  );
   const [chatHistory, updateChatHistory] = useState<TChatHistory>([]);
 
   useEffectOnce(() => {
@@ -28,11 +30,11 @@ export const useMessages = () => {
     updateChatHistoryLS("");
   };
 
-  const addMessageToHistory = (message: Pick<TMessage, "text" | "user">) => {
+  const addMessageToHistory = (message: Pick<TMessage, "content" | "role">) => {
     const newMessage: TMessage = {
-      text: message.text,
+      content: message.content,
       timestamp: Date.now().toString(),
-      user: message.user,
+      role: message.role,
     };
 
     updateChatHistoryBoth(newMessage);

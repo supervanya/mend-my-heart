@@ -1,13 +1,23 @@
 "use client";
-import { TMessage, ChatHistory } from "../components/ChatHistory";
+import { ChatHistory } from "@/components/ChatHistory";
 import { useRef, useState } from "react";
 import { useMessages } from "@/helpers/useMessages";
 import { Message } from "@/components/Message";
 import { INITIAL_GREETING } from "@/helpers/constants";
 import Head from "next/head";
+import { TChatHistory, TUser } from "@/helpers/types";
+import { combineMessages } from "@/helpers/helpers";
 
-const getResponseFromBot = async (message: string) => {
-  const response = await fetch(`/api/hello?message=${message}`);
+const getResponseFromBot = async (
+  history: TChatHistory,
+  newQuestion: string
+) => {
+  const messages = combineMessages(history, newQuestion, "user");
+  const response = await fetch(`/api/openAI`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages }),
+  });
   const data = await response.json();
   return data;
 };
@@ -26,9 +36,9 @@ export default function Home() {
     });
   };
 
-  const handleAddNewMessage = (text: string, user: TMessage["user"]) => {
-    addMessageToHistory({ text, user });
-    if (user === "bot") {
+  const handleAddNewMessage = (text: string, user: TUser) => {
+    addMessageToHistory({ content: text, role: user });
+    if (user === "assistant") {
       setFetching(false);
     } else {
       setInput("");
@@ -44,9 +54,9 @@ export default function Home() {
 
     setFetching(true);
     scrollToBottom();
-    const botResponse = await getResponseFromBot(input);
+    const botResponse = await getResponseFromBot(chatHistory, input);
     scrollToBottom();
-    handleAddNewMessage(botResponse, "bot");
+    handleAddNewMessage(botResponse, "assistant");
     scrollToBottom();
   };
 
@@ -63,14 +73,14 @@ export default function Home() {
         className="mx-auto flex min-h-screen max-w-lg flex-col items-center gap-4 p-4"
       >
         <ChatHistory>
-          <Message user="bot">{INITIAL_GREETING} </Message>
+          <Message role="assistant">{INITIAL_GREETING} </Message>
           {chatHistory?.map((message) => (
-            <Message key={message.timestamp} user={message.user}>
-              {message.text}
+            <Message key={message.timestamp} role={message.role}>
+              {message.content}
             </Message>
           ))}
           {fetching && (
-            <Message user="bot">
+            <Message role="assistant">
               <p className="animate-ping">...</p>
             </Message>
           )}
@@ -94,10 +104,10 @@ export default function Home() {
           <button
             type="submit"
             onClick={handleSubmit}
-            disabled={!input}
+            disabled={!input || fetching}
             className="rounded-md bg-blue-500 px-4 text-white disabled:opacity-50"
           >
-            Submit
+            {fetching ? "Thinking..." : "Submit"}
           </button>
           <button
             className="rounded-md p-2 text-slate-700 disabled:opacity-50"

@@ -1,15 +1,15 @@
-import { TMessage } from "./ChatHistory";
+import { TMessage } from "@/helpers/types";
 
 export const Message: React.FC<
-  Pick<TMessage, "user"> & { children: React.ReactNode }
-> = ({ children, user }) => {
-  const color = user === "bot" ? "bg-gray-500" : "bg-blue-500";
-  const align = user === "bot" ? "justify-start" : "justify-end";
+  Pick<TMessage, "role"> & { children: React.ReactNode }
+> = ({ children, role }) => {
+  const color = role === "assistant" ? "bg-gray-500" : "bg-blue-500";
+  const align = role === "assistant" ? "justify-start" : "justify-end";
 
   return (
-    <div className={`text-base w-full flex ${align}`}>
+    <div className={`flex w-full text-base ${align}`}>
       <p
-        className={`${color} py-2 px-4 rounded-2xl text-white max-w-xs md:max-w-md`}
+        className={`${color} max-w-xs rounded-2xl px-4 py-2 text-white md:max-w-md`}
       >
         {children}
       </p>
