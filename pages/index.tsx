@@ -6,12 +6,14 @@ import { Message } from "@/components/Message";
 import { PROMPTS } from "@/helpers/constants";
 import Head from "next/head";
 import { TChatHistory, TUser } from "@/helpers/types";
-import { combineMessages } from "@/helpers/helpers";
+import { combineMessages, waitASecond } from "@/helpers/helpers";
+import { AnimatedSpeech } from "@/components/AnimatedSpeech";
 
 const getResponseFromBot = async (
   history: TChatHistory,
   newQuestion: string
 ) => {
+  // return "I'm still learning, please come back later!";
   const messages = combineMessages(history, newQuestion, "user");
   const response = await fetch(`/api/openAI`, {
     method: "POST",
@@ -23,21 +25,18 @@ const getResponseFromBot = async (
 };
 
 export default function Home() {
-  const chatContainerRef = useRef<HTMLElement | null>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
   const [fetching, setFetching] = useState(false);
   const [input, setInput] = useState<string>("");
   const { chatHistory, addMessageToHistory, resetChatHistory } = useMessages();
 
   const scrollToBottom = () => {
-    // (iprokopovich)FIXME: this doesn't fully work
-    // wait one second
-    setTimeout(() => {
-      // scroll to the bottom
-      window.scrollTo({
-        top: document.documentElement.scrollHeight + 3300,
-        behavior: "smooth",
-      });
-    }, 200);
+    const container = chatRef.current;
+    if (container) {
+      setTimeout(() => {
+        container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+      }, 200);
+    }
   };
 
   const handleAddNewMessage = (text: string, user: TUser) => {
@@ -55,10 +54,13 @@ export default function Home() {
       return;
     }
     handleAddNewMessage(input, "user");
+    scrollToBottom();
 
+    await waitASecond();
     setFetching(true);
     scrollToBottom();
 
+    await waitASecond(2);
     const botResponse = await getResponseFromBot(chatHistory, input);
     handleAddNewMessage(botResponse, "assistant");
     scrollToBottom();
@@ -67,30 +69,34 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Heart Mender 💔 - ❤️‍🩹</title>
+        <title>Life Journey Sage</title>
       </Head>
 
-      <div className="flex min-h-screen flex-col">
-        <nav className="sticky top-0 w-full rounded-sm bg-slate-600  px-8 py-4 text-center text-xl font-bold text-white backdrop-blur-3xl">
-          Heart Mender 💔 - ❤️‍🩹
+      <div className="flex h-screen flex-col overflow-auto" ref={chatRef}>
+        <nav className="sticky top-0 z-10 w-full rounded-sm bg-slate-600  px-8 py-4 text-center  text-white backdrop-blur-3xl">
+          <p className="text-xl font-bold">Life Journey Sage</p>
+          <span className="text-xs text-slate-300">
+            Remember, I am a silly robot
+          </span>
         </nav>
         <main className="mx-auto flex max-w-lg flex-1 flex-col items-center gap-4 p-4">
           <ChatHistory>
-            <Message role="assistant">
+            <Message role="assistant" index={0}>
               {PROMPTS.relationshipTherapist.greeting}{" "}
             </Message>
-            {chatHistory?.map((message) => (
-              <Message key={message.timestamp} role={message.role}>
-                {message.content.split("\n").map((line, i) => (
-                  <p key={i}>
-                    {line} <br />
-                  </p>
-                ))}
+            {chatHistory?.map((message, i) => (
+              <Message
+                key={message.timestamp}
+                role={message.role}
+                index={i + 1}
+              >
+                {message.content}
               </Message>
             ))}
+
             {fetching && (
-              <Message role="assistant">
-                <p className="animate-ping">...</p>
+              <Message role="assistant" index={chatHistory.length + 1}>
+                <AnimatedSpeech />
               </Message>
             )}
           </ChatHistory>
