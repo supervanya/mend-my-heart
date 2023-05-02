@@ -3,7 +3,7 @@ import { ChatHistory } from "@/components/ChatHistory";
 import { useRef, useState } from "react";
 import { useMessages } from "@/helpers/useMessages";
 import { Message } from "@/components/Message";
-import { INITIAL_GREETING } from "@/helpers/constants";
+import { PROMPTS } from "@/helpers/constants";
 import Head from "next/head";
 import { TChatHistory, TUser } from "@/helpers/types";
 import { combineMessages } from "@/helpers/helpers";
@@ -76,7 +76,9 @@ export default function Home() {
         </nav>
         <main className="mx-auto flex max-w-lg flex-1 flex-col items-center gap-4 p-4">
           <ChatHistory>
-            <Message role="assistant">{INITIAL_GREETING} </Message>
+            <Message role="assistant">
+              {PROMPTS.relationshipTherapist.greeting}{" "}
+            </Message>
             {chatHistory?.map((message) => (
               <Message key={message.timestamp} role={message.role}>
                 {message.content.split("\n").map((line, i) => (
