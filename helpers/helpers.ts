@@ -9,3 +9,6 @@ export const combineMessages = (
   const newMessage: TMessage = { content: message, role: user, timestamp };
   return [...history, newMessage];
 };
+
+export const waitASecond = (s = 1) =>
+  new Promise((res) => setTimeout(res, s * 1000));
