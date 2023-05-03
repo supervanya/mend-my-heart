@@ -1,5 +1,5 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { PROMPTS, UNSURE_RESPONSE } from "@/helpers/constants";
+import { PROMPTS, TPersonas, UNSURE_RESPONSE } from "@/helpers/constants";
 import { TChatHistory } from "@/helpers/types";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Configuration, OpenAIApi } from "openai";
@@ -10,13 +10,14 @@ const openai = new OpenAIApi(configuration);
 
 interface IReqestBody {
   messages: TChatHistory;
+  persona: TPersonas;
 }
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<string>
 ) {
-  const { messages } = req.body as IReqestBody;
+  const { messages, persona } = req.body as IReqestBody;
 
   console.log({ messages });
 
@@ -33,7 +34,7 @@ export default async function handler(
         temperature: 0.7,
         messages: [
           {
-            content: PROMPTS.relationshipTherapist.systemPrompt,
+            content: PROMPTS[persona].systemPrompt,
             role: "system",
           },
           ...prevMessages,

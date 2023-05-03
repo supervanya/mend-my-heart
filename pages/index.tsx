@@ -3,32 +3,42 @@ import { ChatHistory } from "@/components/ChatHistory";
 import { useRef, useState } from "react";
 import { useMessages } from "@/helpers/useMessages";
 import { Message } from "@/components/Message";
-import { PROMPTS } from "@/helpers/constants";
+import { PROMPTS, TPersonas } from "@/helpers/constants";
 import Head from "next/head";
 import { TChatHistory, TUser } from "@/helpers/types";
 import { combineMessages, waitASecond } from "@/helpers/helpers";
 import { AnimatedSpeech } from "@/components/AnimatedSpeech";
+import { toPairs } from "lodash";
+import { useLastActiveChat } from "@/helpers/useLastActiveChat";
 
 const getResponseFromBot = async (
   history: TChatHistory,
-  newQuestion: string
+  newQuestion: string,
+  persona: TPersonas
 ) => {
-  // return "I'm still learning, please come back later!";
   const messages = combineMessages(history, newQuestion, "user");
   const response = await fetch(`/api/openAI`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, persona }),
   });
   const data = await response.json();
   return data;
 };
 
+const lastActiveChat: TPersonas = "lifeCoach";
+
 export default function Home() {
   const chatRef = useRef<HTMLDivElement>(null);
   const [fetching, setFetching] = useState(false);
   const [input, setInput] = useState<string>("");
-  const { chatHistory, addMessageToHistory, resetChatHistory } = useMessages();
+  const { lastActiveChat: persona, setLastActiveChat } = useLastActiveChat();
+  // const [persona, setPersona] = useState<TPersonas>(lastActiveChat);
+
+  const { greeting } = PROMPTS[persona];
+
+  const { chatHistory, addMessageToHistory, resetChatHistory } =
+    useMessages(persona);
 
   const scrollToBottom = () => {
     const container = chatRef.current;
@@ -60,10 +70,16 @@ export default function Home() {
     setFetching(true);
     scrollToBottom();
 
-    await waitASecond(2);
-    const botResponse = await getResponseFromBot(chatHistory, input);
+    // waiting a bit for dramatic effect
+    await waitASecond();
+    const botResponse = await getResponseFromBot(chatHistory, input, persona);
     handleAddNewMessage(botResponse, "assistant");
     scrollToBottom();
+  };
+
+  const handleSetPersona = (persona: TPersonas) => {
+    setLastActiveChat(persona);
+    // setPersona(persona);
   };
 
   return (
@@ -74,16 +90,32 @@ export default function Home() {
 
       <div className="flex h-screen flex-col overflow-auto" ref={chatRef}>
         <nav className="sticky top-0 z-10 w-full rounded-sm bg-slate-600  px-8 py-4 text-center  text-white backdrop-blur-3xl">
-          <p className="text-xl font-bold">Life Journey Sage</p>
-          <span className="text-xs text-slate-300">
-            Remember, I am a silly robot
-          </span>
+          <div className="flex flex-col items-center gap-2">
+            <select
+              className="rounded-md bg-slate-700 p-1 text-white"
+              onChange={({ target }) =>
+                handleSetPersona(target.value as TPersonas)
+              }
+            >
+              {toPairs(PROMPTS).map(([persona, settings]) => (
+                <option key={persona} value={persona}>
+                  {settings.name}
+                </option>
+              ))}
+            </select>
+
+            <span className="text-xs text-slate-300">
+              Remember, I am just a silly robot
+            </span>
+          </div>
         </nav>
+
         <main className="mx-auto flex max-w-lg flex-1 flex-col items-center gap-4 p-4">
           <ChatHistory>
             <Message role="assistant" index={0}>
-              {PROMPTS.relationshipTherapist.greeting}{" "}
+              {greeting}
             </Message>
+
             {chatHistory?.map((message, i) => (
               <Message
                 key={message.timestamp}
@@ -101,6 +133,7 @@ export default function Home() {
             )}
           </ChatHistory>
         </main>
+
         <footer className="sticky bottom-0 flex w-full flex-col items-center gap-2 rounded-sm bg-slate-700 bg-opacity-50 px-8 py-4 backdrop-blur-3xl">
           <textarea
             className="w-full max-w-screen-md rounded-md border-2 border-gray-300 p-2"
