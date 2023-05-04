@@ -1,5 +1,4 @@
 import { useEffectOnce, useLocalStorage } from "usehooks-ts";
-import { useState } from "react";
 import { TChatHistory, TMessage } from "./types";
 import { TPersonas } from "./constants";
 
@@ -13,28 +12,22 @@ const migrateIfNecessary = () => {
   }
 };
 
+const parseChatHistory = (chatHistoryLS: string): TChatHistory =>
+  chatHistoryLS ? JSON.parse(chatHistoryLS) : [];
+
 export const useMessages = (persona: TPersonas) => {
   const [chatHistoryLS, updateChatHistoryLS] = useLocalStorage(persona, "");
-  const [chatHistory, updateChatHistory] = useState<TChatHistory>([]);
+  const chatHistory = parseChatHistory(chatHistoryLS);
 
-  useEffectOnce(() => {
-    migrateIfNecessary();
-    if (chatHistoryLS) {
-      updateChatHistory(JSON.parse(chatHistoryLS) as TChatHistory);
-    }
-  });
+  useEffectOnce(migrateIfNecessary);
 
-  const updateChatHistoryBoth = (newMessage: TMessage) => {
-    updateChatHistory((prev) => {
-      const newChatHistory = [...prev, newMessage];
-      updateChatHistoryLS(JSON.stringify(newChatHistory));
-      return newChatHistory;
-    });
+  const writeMessageToLS = (newMessage: TMessage) => {
+    const newChatHistory = [...chatHistory, newMessage];
+    updateChatHistoryLS(JSON.stringify(newChatHistory));
   };
 
   const resetChatHistory = () => {
     // TODO(iprokopovich): add a confirmation dialog and clear api context
-    updateChatHistory([]);
     updateChatHistoryLS("");
   };
 
@@ -45,7 +38,7 @@ export const useMessages = (persona: TPersonas) => {
       role: message.role,
     };
 
-    updateChatHistoryBoth(newMessage);
+    writeMessageToLS(newMessage);
   };
 
   return {
