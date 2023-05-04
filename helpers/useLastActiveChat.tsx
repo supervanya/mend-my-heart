@@ -1,4 +1,4 @@
-import { useLocalStorage } from "usehooks-ts";
+import { useLocalStorage } from "./useLocalStorage";
 import { TPersonas } from "./constants";
 
 const LS_KEY = "lastActiveChat";

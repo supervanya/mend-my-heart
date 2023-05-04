@@ -16,6 +16,7 @@ const getResponseFromBot = async (
   newQuestion: string,
   persona: TPersonas
 ) => {
+  // return `Still in development persona: ${persona}, newQuestion: ${newQuestion}`;
   const messages = combineMessages(history, newQuestion, "user");
   const response = await fetch(`/api/openAI`, {
     method: "POST",
@@ -30,6 +31,7 @@ export default function Home() {
   const chatRef = useRef<HTMLDivElement>(null);
   const [fetching, setFetching] = useState(false);
   const [input, setInput] = useState<string>("");
+
   const { lastActiveChat: persona, setLastActiveChat } = useLastActiveChat();
 
   const { greeting, oneLiner } = PROMPTS[persona];
@@ -80,8 +82,11 @@ export default function Home() {
         <title>Life Journey Sage</title>
       </Head>
 
-      <div className="flex h-screen flex-col overflow-auto" ref={chatRef}>
-        <nav className="sticky top-0 z-10 w-full rounded-sm bg-slate-600  px-8 py-4 text-center  text-white backdrop-blur-3xl">
+      <div
+        className="flex h-[100dvh] flex-col overflow-auto overscroll-none bg-slate-300"
+        ref={chatRef}
+      >
+        <nav className="sticky top-0 z-10 w-full rounded-sm bg-slate-600  px-8 py-4 text-center text-white backdrop-blur-3xl">
           <div className="flex flex-col items-center gap-2">
             <select
               value={persona}
@@ -107,7 +112,7 @@ export default function Home() {
 
         <main className="mx-auto flex max-w-lg flex-1 flex-col items-center gap-4 p-4">
           <ChatHistory>
-            <Message role="assistant" index={0}>
+            <Message key={`greeting-${persona}`} role="assistant" index={0}>
               {greeting}
             </Message>
 
@@ -131,7 +136,7 @@ export default function Home() {
 
         <footer className="sticky bottom-0 flex w-full flex-col items-center gap-2 rounded-sm bg-slate-700 bg-opacity-50 px-8 py-4 backdrop-blur-3xl">
           <textarea
-            className="w-full max-w-screen-md rounded-md border-2 border-gray-300 p-2"
+            className="w-full max-w-screen-md rounded-md border-2 border-gray-300 p-2 text-slate-800"
             aria-multiline="true"
             placeholder="Tell me in as much details as you would like, but the more the better..."
             value={input}
