@@ -2,7 +2,7 @@ import { useEffectOnce } from "react-use";
 import { TPersonas } from "./constants";
 import { TChatHistory } from "./types";
 import { setStorageValue, useLocalStorage } from "./useLocalStorage";
-import { isObjectLike } from "lodash";
+import { isArray } from "lodash";
 
 const runMigrations = () => {
   // this was used with the initial release of the app
@@ -15,14 +15,14 @@ const runMigrations = () => {
     if (oldRelationshipChatHistory) {
       let parsed = JSON.parse(oldRelationshipChatHistory);
 
-      if (!isObjectLike(parsed)) {
+      if (!isArray(parsed)) {
         parsed = JSON.parse(parsed);
       }
 
-      if (isObjectLike(parsed)) {
+      if (isArray(parsed)) {
         console.warn("Migrating old chat history to new format", parsed);
         setStorageValue(OLD_PERSONA, parsed);
-        localStorage.removeItem(OLD_KEY);
+        // localStorage.removeItem(OLD_KEY);
       }
     }
   } catch (error) {
