@@ -29,8 +29,6 @@ export function useLocalStorage<T>(
     getStorageValue(key, initialValue)
   );
 
-  console.log({ initialValue });
-
   // Listen for changes to the key prop and update the state and local storage
   useEffect(() => {
     const newValue = getStorageValue(key, initialValue);

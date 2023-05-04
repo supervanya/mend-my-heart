@@ -9,7 +9,7 @@ import { TChatHistory, TUser } from "@/helpers/types";
 import { combineMessages, waitASecond } from "@/helpers/helpers";
 import { AnimatedSpeech } from "@/components/AnimatedSpeech";
 import { toPairs } from "lodash";
-import { useLastActiveChat } from "@/helpers/useLastActiveChat";
+import { usePersona } from "@/helpers/useLastActiveChat";
 
 const getResponseFromBot = async (
   history: TChatHistory,
@@ -32,12 +32,11 @@ export default function Home() {
   const [fetching, setFetching] = useState(false);
   const [input, setInput] = useState<string>("");
 
-  const { lastActiveChat: persona, setLastActiveChat } = useLastActiveChat();
-
-  const { greeting, oneLiner } = PROMPTS[persona];
+  const { persona, personaName, setPersona } = usePersona();
+  const { greeting, oneLiner, colors } = persona;
 
   const { chatHistory, addMessageToHistory, resetChatHistory } =
-    useMessages(persona);
+    useMessages(personaName);
 
   const scrollToBottom = () => {
     const container = chatRef.current;
@@ -71,7 +70,11 @@ export default function Home() {
 
     // waiting a bit for dramatic effect
     await waitASecond();
-    const botResponse = await getResponseFromBot(chatHistory, input, persona);
+    const botResponse = await getResponseFromBot(
+      chatHistory,
+      input,
+      personaName
+    );
     handleAddNewMessage(botResponse, "assistant");
     scrollToBottom();
   };
@@ -83,17 +86,19 @@ export default function Home() {
       </Head>
 
       <div
-        className="flex h-[100dvh] flex-col overflow-auto overscroll-none bg-slate-300"
+        style={{ backgroundColor: colors.background }}
+        className={`flex h-[100dvh] flex-col overflow-auto overscroll-none transition-colors duration-500`}
         ref={chatRef}
       >
-        <nav className="sticky top-0 z-10 w-full rounded-sm bg-slate-600  px-8 py-4 text-center text-white backdrop-blur-3xl">
+        <nav
+          style={{ backgroundColor: colors.dark }}
+          className="sticky top-0 z-10 w-full rounded-sm bg-slate-600 px-8 py-4 text-center text-white backdrop-blur-3xl"
+        >
           <div className="flex flex-col items-center gap-2">
             <select
-              value={persona}
+              value={personaName}
               className="rounded-md bg-slate-700 p-1 text-white"
-              onChange={({ target }) =>
-                setLastActiveChat(target.value as TPersonas)
-              }
+              onChange={({ target }) => setPersona(target.value as TPersonas)}
             >
               {toPairs(PROMPTS).map(([persona, settings]) => (
                 <option key={persona} value={persona}>
@@ -112,13 +117,17 @@ export default function Home() {
 
         <main className="mx-auto flex max-w-lg flex-1 flex-col items-center gap-4 p-4">
           <ChatHistory>
-            <Message key={`greeting-${persona}`} role="assistant" index={0}>
+            <Message
+              key={`greeting-${persona.name}`}
+              role="assistant"
+              index={0}
+            >
               {greeting}
             </Message>
 
             {chatHistory?.map((message, i) => (
               <Message
-                key={message.timestamp}
+                key={message.timestamp + persona.name}
                 role={message.role}
                 index={i + 1}
               >
