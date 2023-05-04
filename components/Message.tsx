@@ -1,4 +1,5 @@
 import { TMessage } from "@/helpers/types";
+import { usePersona } from "@/helpers/useLastActiveChat";
 import { motion } from "framer-motion";
 import { forwardRef } from "react";
 
@@ -21,11 +22,16 @@ type MessageProps = Pick<TMessage, "role"> & {
 
 export const Message = forwardRef<HTMLDivElement, MessageProps>(
   (props, ref) => {
+    const { persona } = usePersona();
+    const { colors } = persona;
+
     const { children, role, index } = props;
-    const color =
-      role === "assistant"
-        ? "bg-gradient-to-bl from-[#5b5d60] to-[#81848c]"
-        : "bg-gradient-to-br from-[#0188ef] to-[#6fbeff]";
+
+    const assistantBackground = `linear-gradient(170deg, ${colors.dark}, ${colors.light})`;
+    const userBackground = `linear-gradient(170deg, #0188ef, #6fbeff)`;
+    const backgroundColor =
+      role === "assistant" ? assistantBackground : userBackground;
+
     const align = role === "assistant" ? "justify-start" : "justify-end";
     const margin = role === "assistant" ? "mr-2" : "ml-2";
 
@@ -56,7 +62,8 @@ export const Message = forwardRef<HTMLDivElement, MessageProps>(
         }}
       >
         <p
-          className={`${color} format max-w-xs rounded-2xl px-4 py-2.5 text-white md:max-w-md`}
+          style={{ background: backgroundColor }}
+          className={`format max-w-xs rounded-2xl px-4 py-2.5 text-white md:max-w-md`}
         >
           {typeof children === "string" ? (
             <LineSplitter>{children}</LineSplitter>

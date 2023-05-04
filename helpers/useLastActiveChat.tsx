@@ -1,16 +1,19 @@
-import { useLocalStorage } from "usehooks-ts";
-import { TPersonas } from "./constants";
+import { useLocalStorage } from "react-use";
+import { PROMPTS, TPersonas } from "./constants";
 
 const LS_KEY = "lastActiveChat";
 
-export const useLastActiveChat = () => {
-  const [lastActiveChat, setLastActiveChat] = useLocalStorage<TPersonas>(
+export const usePersona = () => {
+  const [personaNameLs, setPersona] = useLocalStorage<TPersonas>(
     LS_KEY,
     "lifeCoach"
   );
 
+  const personaName = personaNameLs ?? "lifeCoach";
+
   return {
-    lastActiveChat,
-    setLastActiveChat,
+    personaName,
+    persona: PROMPTS[personaName],
+    setPersona,
   };
 };
