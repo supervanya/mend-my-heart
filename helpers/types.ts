@@ -1,3 +1,5 @@
+import { TPersonas } from "./constants";
+
 export type TUser = "user" | "assistant";
 
 export type TMessage = {
@@ -7,3 +9,10 @@ export type TMessage = {
 };
 
 export type TChatHistory = TMessage[];
+
+export interface TApiRequestBody {
+  messages: TChatHistory;
+  persona: TPersonas;
+}
+
+export type TApiResponseBody = string;

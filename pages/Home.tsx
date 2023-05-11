@@ -5,27 +5,12 @@ import { useMessages } from "@/helpers/useMessages";
 import { Message } from "@/components/Message";
 import { PROMPTS, TPersonas } from "@/helpers/constants";
 import Head from "next/head";
-import { TChatHistory, TUser } from "@/helpers/types";
+import { TApiRequestBody, TChatHistory, TUser } from "@/helpers/types";
 import { combineMessages, waitASecond } from "@/helpers/helpers";
 import { AnimatedSpeech } from "@/components/AnimatedSpeech";
 import { toPairs } from "lodash";
 import { usePersona } from "@/helpers/useLastActiveChat";
-
-const getResponseFromBot = async (
-  history: TChatHistory,
-  newQuestion: string,
-  persona: TPersonas
-) => {
-  // return `Still in development persona: ${persona}, newQuestion: ${newQuestion}`;
-  const messages = combineMessages(history, newQuestion, "user");
-  const response = await fetch(`/api/openAI`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages, persona }),
-  });
-  const data = await response.json();
-  return data;
-};
+import { apiClient } from "@/helpers/apiClient";
 
 export default function Home() {
   const chatRef = useRef<HTMLDivElement>(null);
@@ -70,7 +55,7 @@ export default function Home() {
 
     // waiting a bit for dramatic effect
     await waitASecond();
-    const botResponse = await getResponseFromBot(
+    const botResponse = await apiClient.getResponseFromBot(
       chatHistory,
       input,
       personaName

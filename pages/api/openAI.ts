@@ -1,35 +1,65 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { PROMPTS, TPersonas, UNSURE_RESPONSE } from "@/helpers/constants";
-import { TChatHistory } from "@/helpers/types";
+import { TApiResponseBody, TChatHistory } from "@/helpers/types";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Configuration, OpenAIApi } from "openai";
+import { NextRequest, NextResponse } from "next/server";
+import {
+  Configuration,
+  CreateChatCompletionRequest,
+  CreateChatCompletionResponse,
+  OpenAIApi,
+} from "openai";
+
+export const config = {
+  runtime: "edge",
+};
 
 const apiKey = process.env.CHAT_GPT_API_KEY;
 const configuration = new Configuration({ apiKey });
 const openai = new OpenAIApi(configuration);
 
+// TODO(iprokopovich): can I use tRPC to keep types in sync?
 interface IReqestBody {
   messages: TChatHistory;
   persona: TPersonas;
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<string>
-) {
-  const { messages, persona } = req.body as IReqestBody;
+const openAi = async (payload: CreateChatCompletionRequest) => {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 
-  console.log({ messages });
+  const data = (await response.json()) as CreateChatCompletionResponse;
+
+  console.log({ data });
+  return data;
+};
+
+const buildApiResponse = (message: TApiResponseBody, status: number) =>
+  NextResponse.json(message, { status });
+
+export default async function handler(req: NextRequest): Promise<NextResponse> {
+  const { messages, persona } = (await req.json()) as IReqestBody;
+
+  console.log({ configuration });
+
+  console.info({ messages });
 
   if (!messages) {
-    res.status(400);
+    return buildApiResponse("You need to send me something to work with", 400);
   } else {
     try {
       const prevMessages = messages.map(({ content, role }) => ({
         content,
         role,
       }));
-      const completion = await openai.createChatCompletion({
+
+      const completion = await openAi({
         model: "gpt-3.5-turbo",
         temperature: 0.7,
         messages: [
@@ -41,12 +71,17 @@ export default async function handler(
         ],
       });
 
-      const bestReply =
-        completion.data.choices[0].message?.content ?? UNSURE_RESPONSE;
+      console.info({ completion });
 
-      res.status(200).json(bestReply);
+      const bestReply =
+        completion.choices[0].message?.content ?? UNSURE_RESPONSE;
+
+      console.info({ bestReply });
+
+      return buildApiResponse(bestReply, 200);
     } catch (error) {
-      res.status(500).json("Internal Server Error");
+      console.error({ error });
+      return buildApiResponse("Internal Server Error", 500);
     }
   }
 }
