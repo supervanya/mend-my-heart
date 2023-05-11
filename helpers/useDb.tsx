@@ -71,11 +71,10 @@ const migrateV2 = () => {
         (parsed as TChatHistory).forEach((message) => {
           db.messages.add({ ...message, persona });
         });
-
-        localStorage.setItem(HAS_MIGRATED_KEY, new Date().toISOString());
-        console.warn("Migration successful");
       }
     });
+    localStorage.setItem(HAS_MIGRATED_KEY, new Date().toISOString());
+    console.warn("Migration successful");
   } catch (error) {
     console.error("Error migrating old chat history", error);
   }
