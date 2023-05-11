@@ -5,12 +5,13 @@ import { useMessages } from "@/helpers/useMessages";
 import { Message } from "@/components/Message";
 import { PROMPTS, TPersonas } from "@/helpers/constants";
 import Head from "next/head";
-import { TApiRequestBody, TChatHistory, TUser } from "@/helpers/types";
-import { combineMessages, waitASecond } from "@/helpers/helpers";
+import { TUser } from "@/helpers/types";
+import { waitASecond } from "@/helpers/helpers";
 import { AnimatedSpeech } from "@/components/AnimatedSpeech";
 import { toPairs } from "lodash";
 import { usePersona } from "@/helpers/useLastActiveChat";
 import { apiClient } from "@/helpers/apiClient";
+import { messagesDb } from "@/db";
 
 export default function Home() {
   const chatRef = useRef<HTMLDivElement>(null);
@@ -20,8 +21,11 @@ export default function Home() {
   const { persona, personaName, setPersona } = usePersona();
   const { greeting, oneLiner, colors } = persona;
 
-  const { chatHistory, addMessageToHistory, resetChatHistory } =
-    useMessages(personaName);
+  const {
+    chat: chatHistory,
+    addMessageToHistory,
+    resetChat: resetChatHistory,
+  } = useMessages(personaName);
 
   const scrollToBottom = () => {
     const container = chatRef.current;
