@@ -35,7 +35,16 @@ export const useStorage = (persona: TPersonas) => {
 
   const [chat, updateChat] = useLocalStorage<TChatHistory>(persona, []);
 
-  const resetChat = () => updateChat([]);
+  const resetChat = () => {
+    const confirmed = confirm(
+      "Are you sure you want to reset the chat history? This action cannot be undone."
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    return updateChat([]);
+  };
 
   return { chat, updateChat, resetChat };
 };
