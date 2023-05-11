@@ -15,7 +15,6 @@ export class MySubClassedDexie extends Dexie {
     this.version(1).stores({
       messages: "++id, persona, content, role, timestamp", // Primary key and indexed props
     });
-    console.log(this.messages);
   }
 }
 
