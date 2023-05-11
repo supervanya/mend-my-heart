@@ -5,11 +5,15 @@ import { useEffectOnce } from "react-use";
 import { useLiveQuery } from "dexie-react-hooks";
 import { isArray } from "lodash";
 
-const runMigrations = () => {
+const hasMigrated = (key: string) => {
+  const hasMigrated = localStorage.getItem(key);
+  return hasMigrated !== null;
+};
+
+const migrateV1 = () => {
   // this was used with the initial release of the app
-  const HAS_MIGRATED_KEY = "hasMigrated";
-  const hasMigrated = localStorage.getItem(HAS_MIGRATED_KEY);
-  if (hasMigrated !== null) {
+  const HAS_MIGRATED_KEY = "hasMigratedV1";
+  if (hasMigrated(HAS_MIGRATED_KEY)) {
     return;
   }
 
@@ -41,6 +45,45 @@ const runMigrations = () => {
   } catch (error) {
     console.error("Error migrating old chat history", error);
   }
+};
+
+const migrateV2 = () => {
+  const HAS_MIGRATED_KEY = "hasMigratedV2";
+  debugger;
+  if (hasMigrated(HAS_MIGRATED_KEY)) {
+    return;
+  }
+
+  const personasToMigrate: TPersonas[] = ["lifeCoach", "relationshipTherapist"];
+
+  try {
+    personasToMigrate.forEach((persona) => {
+      const prevChatHistory = localStorage.getItem(persona);
+      if (!prevChatHistory) {
+        return;
+      }
+      const parsed = JSON.parse(prevChatHistory) as TChatHistory;
+
+      console.log({ prevChatHistory, parsed, persona });
+
+      if (prevChatHistory && isArray(parsed)) {
+        console.warn("Migrating old chat history to new format", parsed);
+        (parsed as TChatHistory).forEach((message) => {
+          db.messages.add({ ...message, persona });
+        });
+
+        localStorage.setItem(HAS_MIGRATED_KEY, new Date().toISOString());
+        console.warn("Migration successful");
+      }
+    });
+  } catch (error) {
+    console.error("Error migrating old chat history", error);
+  }
+};
+
+const runMigrations = () => {
+  migrateV1();
+  migrateV2();
 };
 
 export const useDb = (persona: TPersonas) => {
