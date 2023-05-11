@@ -43,7 +43,7 @@ export const useStorage = (persona: TPersonas) => {
       return;
     }
 
-    return updateChat([]);
+    updateChat([]);
   };
 
   return { chat, updateChat, resetChat };

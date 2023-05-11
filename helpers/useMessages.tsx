@@ -1,13 +1,9 @@
 import { TMessage } from "./types";
 import { TPersonas } from "./constants";
-import { useStorage } from "./useStorage";
+import { useDb } from "./useDb";
 
 export const useMessages = (persona: TPersonas) => {
-  const {
-    chat: chatHistory,
-    resetChat: resetChatHistory,
-    updateChat: updateChatHistory,
-  } = useStorage(persona);
+  const { chat, resetChat, updateChat } = useDb(persona);
 
   const addMessageToHistory = (message: Pick<TMessage, "content" | "role">) => {
     const newMessage: TMessage = {
@@ -16,12 +12,12 @@ export const useMessages = (persona: TPersonas) => {
       role: message.role,
     };
 
-    updateChatHistory((prevChat) => [...prevChat, newMessage]);
+    updateChat(newMessage);
   };
 
   return {
-    chatHistory,
-    resetChatHistory,
+    chat,
+    resetChat,
     addMessageToHistory,
   };
 };
